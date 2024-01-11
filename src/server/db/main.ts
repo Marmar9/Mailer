@@ -1,44 +1,17 @@
+import { MongoClient } from "mongodb";
 import typedEnv from "@/config";
-import mongoose from "mongoose";
-
+// Connection URL
 const url = typedEnv.MONGO_URL;
+const databaseName = "mailer";
+async function main(collectionName: string) {
+  const client = new MongoClient(url);
+  await client.connect();
 
-mongoose.connect(url);
+  const db = client.db(databaseName);
 
-// Get the default connection
+  const collection = db.collection(collectionName);
 
-// Event handlers for connection events
+  return collection;
+}
 
-const messageSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  surname: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  admin: {
-    type: Boolean,
-    default: false,
-  },
-});
-
-export const db = mongoose.connection;
-
-db.on("error", (error) => {
-  console.error("MongoDB connection error:", error);
-});
-
-db.once("open", () => {
-  console.log("Connected to MongoDB");
-});
+export default main;

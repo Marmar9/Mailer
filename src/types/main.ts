@@ -1,5 +1,5 @@
 export type DBMESSAGE = {
-  id: string;
+  id: any;
   title: string;
   sendersEmail: string;
   sendersName: string;

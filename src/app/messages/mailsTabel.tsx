@@ -97,7 +97,7 @@ export default function MailsTable() {
   // Fields of table
   const columns = useMemo<ColumnDef<DBMESSAGE>[]>(
     () => [
-      { accessorKey: "id", header: "ID" },
+      { accessorKey: "id", header: "ID", accessorFn: (row) => row.id },
       { accessorKey: "sendersName" },
       { accessorKey: "title" },
       {
@@ -127,9 +127,10 @@ export default function MailsTable() {
     );
   // Prepare data from infinite query
   const mails = useMemo(
-    () => data?.pages?.flatMap(({ messages }) => messages) ?? [],
+    () => data?.pages?.flatMap(({ data }) => data) ?? [],
     [data]
   );
+
   // Get additional data from infinite query
   const totalDBRowCount = data?.pages?.[0]?.meta?.totalRowCount ?? 0;
   const totalFetched = mails.length;

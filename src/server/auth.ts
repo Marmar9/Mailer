@@ -1,6 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import Users from "./db/users";
+import db from "@/server/db/main";
 export const authConfig: NextAuthOptions = {
   // Configure one or more authentication providers
   callbacks: {
@@ -29,10 +29,10 @@ export const authConfig: NextAuthOptions = {
         password: { label: "password", type: "password" },
       },
       async authorize(credentials, req) {
-        const userData = await Users.findOne({
+        const users = await db("users");
+        const userData = await users.findOne({
           email: credentials?.email,
         });
-        console.log(userData);
         if (!userData) return null;
         if (userData?.password !== credentials?.password) return null;
 

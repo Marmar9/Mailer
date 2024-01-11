@@ -5,8 +5,7 @@ import { DBMESSAGE, DBMESSAGES } from "@/types/main";
 import data from "@/mock_data.json";
 import AppRouter from "next/dist/client/components/app-router";
 import { TRPCError } from "@trpc/server";
-import Messages from "@/server/db/messages";
-import { db } from "../db/main";
+import db from "@/server/db/main";
 async function getMessages({
   limit,
   cursor,
@@ -45,15 +44,27 @@ export const appRouter = router({
     .query(async ({ input }) => {
       const limit = input.limit ?? 25;
       let { cursor } = input;
-
+      const messages = await db("messages");
       // const messages = await getMessages({ cursor, limit });
-      const messages = await Messages.find().limit(limit).skip(cursor);
-
+      const data = await messages
+        .find({
+          sendersName: { $ne: null },
+          title: { $ne: null },
+          sendersEmail: { $ne: null },
+          receiversEmail: { $ne: null },
+          read: { $ne: null },
+          content: { $ne: null },
+          contentType: { $ne: null },
+          date: { $ne: null },
+        })
+        .skip(cursor)
+        .limit(limit)
+        .toArray();
       cursor += limit;
 
       return {
         meta: { totalRowCount: data.length },
-        messages,
+        data,
         cursor,
       };
     }),
@@ -98,23 +109,24 @@ export const appRouter = router({
         sendersName,
         title,
       } = input;
-
-      new Messages({
+      const messages = await db("messages");
+      const result = await messages.insertOne({
+        title,
+        sendersEmail,
+        sendersName,
+        receiversEmail,
+        read: false,
         content,
         contentType,
         date,
-        receiversEmail,
-        sendersEmail,
-        sendersName,
-        title,
-      }).save();
+      });
       return;
     }),
   deleteMessageProcedure: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
       // const a = await db.models.users.find();
-      // return a;
+      return 1;
     }),
 });
 
